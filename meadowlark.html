@@ -97,5 +97,80 @@
     <div><a href="#">Privacy</a>|<a href="#">Terms</a>|<a href="#">Refund policy</a></div>
     <div style="margin-top:10px">© 2026 Meadowlark Naturals Ltd. Skipton, North Yorkshire.</div>
   </footer>
+
+  <script>
+  /* URL-1714 end-to-end test loader: injects a widget script whose body
+     contains a literal closing-script sequence (assembled by concatenation so
+     THIS static file stays valid HTML). Live DOM: one script node, invisible.
+     Serialized-then-reparsed DOM: the script splits at the embedded closer and
+     the code tail leaks into extracted text - the Happy V mechanism. */
+  (function () {
+    var closer = "</scr" + "ipt>";
+    var code = [
+      "/* ============================================================",
+      "   CART WIDGET (e2e fixture) - installation:",
+      "   add <script src=\"widget.js\" defer>" , closer,
+      "   before the closing body tag.",
+      "   ============================================================ */",
+      "(function () {",
+      "  var DEBUG = true;",
+      "  function log() { if (!DEBUG) return; console.log.apply(console, ['[E2EWidget]'].concat([].slice.call(arguments))); }",
+      "  if (window.__e2eWidgetInit) { log('already initialized'); return; }",
+      "  window.__e2eWidgetInit = true;",
+      "  var BADGES = [",
+      "    { src: 'https://example.com/badge-one.svg', text: 'Herbalist Approved' },",
+      "    { src: 'https://example.com/badge-two.svg', text: 'Fifty Thousand Happy Customers' },",
+      "    { src: 'https://example.com/badge-three.svg', text: 'Fast Shipping And Easy Returns' }",
+      "  ];",
+      "  function setTextWithBreaks(el, text) {",
+      "    var parts = String(text).split('|');",
+      "    parts.forEach(function (part, i) {",
+      "      if (i > 0) { el.appendChild(document.createElement('br')); }",
+      "      el.appendChild(document.createTextNode(part));",
+      "    });",
+      "  }",
+      "  function buildBadges() {",
+      "    var wrap = document.createElement('div');",
+      "    wrap.className = 'e2e-widget-badges';",
+      "    wrap.setAttribute('data-e2e-widget', '');",
+      "    wrap.style.display = 'none';",
+      "    BADGES.forEach(function (b, idx) {",
+      "      if (idx > 0) {",
+      "        var sep = document.createElement('span');",
+      "        sep.className = 'e2e-widget-badges__sep';",
+      "        sep.setAttribute('aria-hidden', 'true');",
+      "        wrap.appendChild(sep);",
+      "      }",
+      "      var item = document.createElement('div');",
+      "      item.className = 'e2e-widget-badges__item';",
+      "      var img = document.createElement('img');",
+      "      img.src = b.src; img.alt = ''; img.width = 28; img.height = 28; img.loading = 'lazy';",
+      "      img.onerror = function () { log('badge image missing', b.src); };",
+      "      var span = document.createElement('span');",
+      "      setTextWithBreaks(span, b.text);",
+      "      item.appendChild(img); item.appendChild(span); wrap.appendChild(item);",
+      "    });",
+      "    return wrap;",
+      "  }",
+      "  function inject() {",
+      "    var host = document.body;",
+      "    if (!host) { return; }",
+      "    var existing = document.querySelector('[data-e2e-widget]');",
+      "    if (existing) { return; }",
+      "    host.appendChild(buildBadges());",
+      "    log('injected');",
+      "  }",
+      "  var timer = setInterval(function () {",
+      "    if (document.readyState === 'complete') { clearInterval(timer); inject(); }",
+      "  }, 500);",
+      "  if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', inject); } else { inject(); }",
+      "})();"
+    ].join("\n");
+    var s = document.createElement("script");
+    s.id = "e2e-injected-widget";
+    s.textContent = code;
+    document.head.appendChild(s);
+  })();
+  </script>
 </body>
 </html>
